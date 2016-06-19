@@ -1,0 +1,24 @@
+{
+  "name": "delta-force",
+  "version": "1.0.0",
+  "description": "[Events and Emitters - Slides](http://slides.com/theremix/events-and-emitters)",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha 'lib/*.spec.js' --watch --bail"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tokumori/Delta-Force.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tokumori/Delta-Force/issues"
+  },
+  "homepage": "https://github.com/tokumori/Delta-Force#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4"
+  }
+}
