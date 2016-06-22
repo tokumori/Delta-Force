@@ -108,9 +108,29 @@ describe('Controls', function () {
 
     this.clock.tick(4500);
     expect(tickHandler.callCount).to.be.equal(4);
+    timer.stop();
 
     this.clock.tick(500);
     expect(tickHandler.callCount).to.be.equal(4);
+  });
+
+  it('should restart from the same time', function () {
+    var timer = new Timer();
+    var tickHandler = sinon.spy();
+
+    timer.on('tick', tickHandler);
+    timer.start();
+
+    this.clock.tick(4600);
+    expect(tickHandler.callCount).to.be.equal(4);
+
+    timer.stop();
+    this.clock.tick(400);
+    expect(tickHandler.callCount).to.be.equal(4);
+
+    timer.start();
+    this.clock.tick(400);
+    expect(tickHandler.callCount).to.be.equal(5);
   });
 
 });
