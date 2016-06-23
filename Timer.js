@@ -13,44 +13,79 @@ function Timer (max) {
   this.totalTime = 0;
   this.max = max || 10;
 
-  this.start = function () {
-    this.startTime = Date.now();
-    this.emit('start', {startTime: this.startTime});
-    if (this.totalTime === 0) {
-      this.interval = setInterval(function () {
-        self.emit('tick', {interval : self.i++});
+  // this.start = function () {
+  //   this.startTime = Date.now();
+  //   this.emit('start', {startTime: this.startTime});
+  //   if (this.totalTime === 0) {
+  //     this.interval = setInterval(function () {
+  //       self.emit('tick', {interval : self.i++});
+  //       if (self.i >= self.max) {
+  //         self.stop();
+  //       }
+  //     }, 1000);
+  //   } else {
+  //     var mSecRemainder = 1000 - (this.totalTime % 1000);
+  //     this.interval = setInterval(function () {
+  //       self.emit('tick', {interval : self.i++});
+  //       clearInterval(self.interval);
+  //       if (self.i >= self.max) {
+  //         self.stop();
+  //       }
+  //       self.interval = setInterval(function () {
+  //         self.emit('tick', {interval: self.i++});
+  //         if (self.i >= self.max) {
+  //           self.stop();
+  //         }
+  //       }, 1000);
+  //     }, mSecRemainder);
+  //   }
+  // };
+
+//   this.stop = function () {
+//     this.stopTime = Date.now();
+//     this.totalTime += this.stopTime - this.startTime;
+//     this.emit('stop', {stopTime: this.stopTime});
+//     clearInterval(this.interval);
+//   };
+}
+
+util.inherits(Timer, EventEmitter);
+
+Timer.prototype.start = function () {
+  var self = this;
+  this.startTime = Date.now();
+  this.emit('start', {startTime: this.startTime});
+  if (this.totalTime === 0) {
+    this.interval = setInterval(function () {
+      self.emit('tick', {interval : self.i++});
+      if (self.i >= self.max) {
+        self.stop();
+      }
+    }, 1000);
+  } else {
+    this.mSecRemainder = 1000 - (this.totalTime % 1000);
+    this.interval = setInterval(function () {
+      self.emit('tick', {interval : self.i++});
+      clearInterval(self.interval);
+      if (self.i >= self.max) {
+        self.stop();
+      }
+      self.interval = setInterval(function () {
+        self.emit('tick', {interval: self.i++});
         if (self.i >= self.max) {
           self.stop();
         }
       }, 1000);
-    } else {
-      var mSecRemainder = 1000 - (this.totalTime % 1000);
-      this.interval = setInterval(function () {
-        self.emit('tick', {interval : self.i++});
-        clearInterval(self.interval);
-        if (self.i >= self.max) {
-          self.stop();
-        }
-        self.interval = setInterval(function () {
-          self.emit('tick', {interval: self.i++});
-          if (self.i >= self.max) {
-            self.stop();
-          }
-        }, 1000);
-      }, mSecRemainder);
-    }
-  };
+    }, self.mSecRemainder);
+  }
+};
 
-  this.stop = function () {
-    this.stopTime = Date.now();
-    this.totalTime += this.stopTime - this.startTime;
-    this.emit('stop', {stopTime: this.stopTime});
-    clearInterval(this.interval);
-  };
-}
-
-
-util.inherits(Timer, EventEmitter);
+Timer.prototype.stop = function () {
+  this.stopTime = Date.now();
+  this.totalTime += this.stopTime - this.startTime;
+  this.emit('stop', {stopTime: this.stopTime});
+  clearInterval(this.interval);
+};
 
 var timer = new Timer();
 
@@ -59,7 +94,7 @@ function tickHandler (event) {
 }
 
 function startHandler (event) {
-  process.stdout.write('start ' + this.startTime + ' ' + ' \n');
+  process.stdout.write('start ' + this.mSecRemainder + ' \n');
 }
 
 function stopHandler (event) {
@@ -70,10 +105,10 @@ timer.addListener('tick', tickHandler);
 timer.addListener('start', startHandler);
 timer.addListener('stop', stopHandler);
 
-// timer.start();
-// setTimeout(function() {
-//   timer.stop();
-// }, 9000);
-// setTimeout(function() {
-//   timer.start();
-// }, 9900);
+timer.start();
+setTimeout(function() {
+  timer.stop();
+}, 9000);
+setTimeout(function() {
+  timer.start();
+}, 9900);
