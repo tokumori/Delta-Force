@@ -16,6 +16,7 @@ beforeEach(function () {
   tickHandler = sinon.spy();
   startHandler = sinon.spy();
   stopHandler = sinon.spy();
+  completeHandler = sinon.spy();
 });
 afterEach(function () {
   this.clock.restore();
@@ -179,7 +180,7 @@ describe('Time Limit', function () {
     expect(stopHandler.callCount).to.be.equal(2);
   });
 
-  it('should stop after 20 ticks', function () {
+  it('should stop after 20 ticks and timer should be at 20000 ms', function () {
     var timer = new Timer(20);
 
     timer.on('tick', tickHandler);
@@ -201,6 +202,7 @@ describe('Time Limit', function () {
     this.clock.tick(10000);
     expect(tickHandler.callCount).to.be.equal(20);
     expect(stopHandler.callCount).to.be.equal(3);
+    expect(timer.totalTime).to.be.equal(20000);
   });
 });
 
