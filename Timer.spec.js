@@ -5,27 +5,35 @@ var sinon = require('sinon');
 var Timer = require('./Timer');
 var EventEmitter = require('events');
 
+var timer;
+var tickHandler;
+var startHandler;
+var stopHandler;
+
+beforeEach(function () {
+  timer = new Timer();
+  this.clock = sinon.useFakeTimers();
+  tickHandler = sinon.spy();
+  startHandler = sinon.spy();
+  stopHandler = sinon.spy();
+});
+afterEach(function () {
+  this.clock.restore();
+});
+
 describe('BasicTimer', function () {
-  beforeEach(function () {
-    this.clock = sinon.useFakeTimers();
-  });
-  afterEach(function () {
-    this.clock.restore();
-  });
+
 
   it('should be a function', function () {
     expect(Timer).to.be.a('function');
   });
 
   it('should be an instance of EventEmitter', function () {
-    var timer = new Timer();
     expect(timer).to.be.an.instanceof(EventEmitter);
   });
 
 
   it.skip('should emit a "tick" event every second', function () {
-    var tickHandler = sinon.spy();
-    var timer = new BasicTimer();
     timer.on('tick', tickHandler);
 
     this.clock.tick(1000);
@@ -40,22 +48,13 @@ describe('BasicTimer', function () {
 });
 
 describe('Controls', function () {
-  beforeEach(function () {
-    this.clock = sinon.useFakeTimers();
-  });
-  afterEach(function () {
-    this.clock.restore();
-  });
 
   it('should have "start" and "stop" method', function () {
-    var timer = new Timer();
     expect(timer.start).to.exist;
     expect(timer.stop).to.exist;
   });
 
   it('should not auto-start', function () {
-    var tickHandler = sinon.spy();
-    var timer = new Timer();
     timer.on('tick', tickHandler);
 
     this.clock.tick(1000);
@@ -63,9 +62,6 @@ describe('Controls', function () {
   });
 
   it('should emit start when start method is called', function () {
-    var timer = new Timer();
-    var startHandler = sinon.spy();
-
     timer.on('start', startHandler);
     timer.start();
     expect(startHandler.called).to.be.true;
@@ -76,9 +72,6 @@ describe('Controls', function () {
   });
 
   it('should emit tick when start is called', function() {
-    var timer = new Timer();
-    var tickHandler = sinon.spy();
-
     timer.on('tick', tickHandler);
     timer.start();
 
@@ -87,9 +80,6 @@ describe('Controls', function () {
   });
 
   it('should emit stop when stop method is called', function () {
-    var timer = new Timer();
-    var stopHandler = sinon.spy();
-
     timer.on('stop', stopHandler);
     timer.stop();
     expect(stopHandler.called).to.be.true;
@@ -100,9 +90,6 @@ describe('Controls', function () {
   });
 
   it('should stop the timer when stop method is called', function () {
-    var timer = new Timer();
-    var tickHandler = sinon.spy();
-
     timer.on('tick', tickHandler);
     timer.start();
 
@@ -115,9 +102,6 @@ describe('Controls', function () {
   });
 
   it('should restart from the same time', function () {
-    var timer = new Timer();
-    var tickHandler = sinon.spy();
-
     timer.on('tick', tickHandler);
     timer.start();
 
@@ -152,12 +136,6 @@ describe('Controls', function () {
 });
 
 describe('Time Limit', function () {
-  beforeEach(function () {
-    this.clock = sinon.useFakeTimers();
-  });
-  afterEach(function () {
-    this.clock.restore();
-  });
 
   it('should have a default max value of 10 seconds', function () {
     var timer = new Timer();
@@ -187,10 +165,6 @@ describe('Time Limit', function () {
   });
 
   it('should stop after the default amount of ticks', function () {
-    var timer = new Timer();
-    var tickHandler = sinon.spy();
-    var stopHandler = sinon.spy();
-
     timer.on('tick', tickHandler);
     timer.on('stop', stopHandler);
     timer.start();
@@ -207,8 +181,6 @@ describe('Time Limit', function () {
 
   it('should stop after 20 ticks', function () {
     var timer = new Timer(20);
-    var tickHandler = sinon.spy();
-    var stopHandler = sinon.spy();
 
     timer.on('tick', tickHandler);
     timer.on('stop', stopHandler);
@@ -230,4 +202,8 @@ describe('Time Limit', function () {
     expect(tickHandler.callCount).to.be.equal(20);
     expect(stopHandler.callCount).to.be.equal(3);
   });
+});
+
+describe ('Lag Event', function () {
+  it('should have a default lag value of 50')
 });

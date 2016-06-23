@@ -19,7 +19,6 @@ util.inherits(Timer, EventEmitter);
 Timer.prototype.start = function () {
   var self = this;
   this.startTime = Date.now();
-  this.emit('start', {startTime: this.startTime});
   if (this.totalTime === 0) {
     this.interval = setInterval(function () {
       self.emit('tick', {interval : self.i++});
@@ -43,6 +42,7 @@ Timer.prototype.start = function () {
       }, 1000);
     }, self.mSecRemainder);
   }
+  this.emit('start', {startTime: this.startTime});
 };
 
 Timer.prototype.stop = function () {
@@ -52,7 +52,7 @@ Timer.prototype.stop = function () {
   clearInterval(this.interval);
 };
 
-var timer = new Timer();
+var timer = new Timer(20);
 
 function tickHandler (event) {
   process.stdout.write('tick ' + this.i + ' \n');
@@ -70,10 +70,10 @@ timer.addListener('tick', tickHandler);
 timer.addListener('start', startHandler);
 timer.addListener('stop', stopHandler);
 
-timer.start();
-setTimeout(function() {
-  timer.stop();
-}, 9000);
-setTimeout(function() {
-  timer.start();
-}, 9900);
+// timer.start();
+// setTimeout(function() {
+//   timer.stop();
+// }, 9100);
+// setTimeout(function() {
+//   timer.start();
+// }, 9900);

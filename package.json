@@ -2,7 +2,7 @@
   "name": "delta-force",
   "version": "1.0.0",
   "description": "[Events and Emitters - Slides](http://slides.com/theremix/events-and-emitters)",
-  "main": "index.js",
+  "main": "Timer.js",
   "scripts": {
     "test": "mocha '*.spec.js' --watch --bail"
   },
