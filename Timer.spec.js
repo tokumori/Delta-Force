@@ -162,7 +162,7 @@ describe('Time Limit', function () {
   it('should have a default max value of 10 seconds', function () {
     var timer = new Timer();
     expect(timer.max).to.be.equal(10);
-  }) ;
+  });
 
   it('should accept any number as its max value', function () {
     var timer = new Timer(20);
@@ -170,10 +170,28 @@ describe('Time Limit', function () {
 
     var timer2 = new Timer(50);
     expect(timer2.max).to.be.equal(50);
-  })
-
-  it('should throw an error if a non-number is passed through', function (){
-
   });
 
+  it.skip('should throw an error if a non-number is passed through', function (){
+    expect().to.throw(Error);
+  });
+
+  it('should stop after the max amount of ticks', function () {
+    var timer = new Timer();
+    var tickHandler = sinon.spy();
+    var stopHandler = sinon.spy();
+
+    timer.on('tick', tickHandler);
+    timer.on('stop', stopHandler);
+    timer.start();
+
+    this.clock.tick(9500);
+    timer.stop();
+
+    this.clock.tick(1000);
+    timer.start();
+    this.clock.tick(500);
+    expect(tickHandler.callCount).to.be.equal(10);
+    expect(stopHandler.callCount).to.be.equal(2);
+  });
 });
