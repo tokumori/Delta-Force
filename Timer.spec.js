@@ -149,5 +149,31 @@ describe('Controls', function () {
     this.clock.tick(500);
     expect(tickHandler.callCount).to.be.equal(7);
   });
+});
+
+describe('Time Limit', function () {
+  beforeEach(function () {
+    this.clock = sinon.useFakeTimers();
+  });
+  afterEach(function () {
+    this.clock.restore();
+  });
+
+  it('should have a default max value of 10 seconds', function () {
+    var timer = new Timer();
+    expect(timer.max).to.be.equal(10);
+  }) ;
+
+  it('should accept any number as its max value', function () {
+    var timer = new Timer(20);
+    expect(timer.max).to.be.equal(20);
+
+    var timer2 = new Timer(50);
+    expect(timer2.max).to.be.equal(50);
+  })
+
+  it('should throw an error if a non-number is passed through', function (){
+
+  });
 
 });
