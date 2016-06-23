@@ -121,16 +121,33 @@ describe('Controls', function () {
     timer.on('tick', tickHandler);
     timer.start();
 
-    this.clock.tick(4600);
+    this.clock.tick(4700);
     expect(tickHandler.callCount).to.be.equal(4);
 
     timer.stop();
-    this.clock.tick(400);
+    this.clock.tick(200);
     expect(tickHandler.callCount).to.be.equal(4);
 
     timer.start();
-    this.clock.tick(400);
+    this.clock.tick(300);
     expect(tickHandler.callCount).to.be.equal(5);
+
+    this.clock.tick(800);
+    expect(tickHandler.callCount).to.be.equal(5);
+
+    this.clock.tick(200);
+    expect(tickHandler.callCount).to.be.equal(6);
+
+    this.clock.tick(500);
+    expect(tickHandler.callCount).to.be.equal(6);
+
+    timer.stop();
+    this.clock.tick(500);
+    expect(tickHandler.callCount).to.be.equal(6);
+
+    timer.start();
+    this.clock.tick(500);
+    expect(tickHandler.callCount).to.be.equal(7);
   });
 
 });
