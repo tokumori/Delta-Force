@@ -172,11 +172,21 @@ describe('Time Limit', function () {
     expect(timer2.max).to.be.equal(50);
   });
 
-  it.skip('should throw an error if a non-number is passed through', function (){
-    expect().to.throw(Error);
+  it('should throw an error if a non-number is passed through', function (){
+    expect(function () {
+      var timer = new Timer('string');
+      }).to.throw(Error);
+
+    expect(function () {
+      var timer = new Timer(null);
+    }).to.throw(Error);
+
+    expect(function () {
+      var timer = new Timer(20);
+    }).to.not.throw(Error);
   });
 
-  it('should stop after the max amount of ticks', function () {
+  it('should stop after the default amount of ticks', function () {
     var timer = new Timer();
     var tickHandler = sinon.spy();
     var stopHandler = sinon.spy();
@@ -193,5 +203,31 @@ describe('Time Limit', function () {
     this.clock.tick(500);
     expect(tickHandler.callCount).to.be.equal(10);
     expect(stopHandler.callCount).to.be.equal(2);
+  });
+
+  it('should stop after 20 ticks', function () {
+    var timer = new Timer(20);
+    var tickHandler = sinon.spy();
+    var stopHandler = sinon.spy();
+
+    timer.on('tick', tickHandler);
+    timer.on('stop', stopHandler);
+    timer.start();
+
+    this.clock.tick(9500);
+    timer.stop();
+
+    this.clock.tick(1000);
+    timer.start();
+
+    this.clock.tick(600);
+    timer.stop();
+
+    this.clock.tick(1000);
+    timer.start();
+
+    this.clock.tick(10000);
+    expect(tickHandler.callCount).to.be.equal(20);
+    expect(stopHandler.callCount).to.be.equal(3);
   });
 });
