@@ -44,21 +44,21 @@ function tickHandler (event) {
 }
 
 function startHandler (event) {
-  process.stdout.write('start ' + this.startTime + ' \n');
+  process.stdout.write('start ' + this.startTime + ' ' + ' \n');
 }
 
 function stopHandler (event) {
-  process.stdout.write('stop ' + this.stopTime + ' \n');
+  process.stdout.write('stop ' + this.stopTime + ' ' + this.totalTime + ' \n');
 }
 
 timer.addListener('tick', tickHandler);
 timer.addListener('start', startHandler);
 timer.addListener('stop', stopHandler);
 
-// timer.start();
-// setTimeout(function() {
-//   timer.stop();
-// }, 4700);
-// setTimeout(function() {
-//   timer.start();
-// }, 5100);
+timer.start();
+setTimeout(function() {
+  timer.stop();
+}, 4700);
+setTimeout(function() {
+  timer.start();
+}, 5100);
