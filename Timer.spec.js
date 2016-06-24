@@ -9,6 +9,7 @@ var timer;
 var tickHandler;
 var startHandler;
 var stopHandler;
+var tickEmitStub;
 
 beforeEach(function () {
   timer = new Timer();
@@ -17,6 +18,7 @@ beforeEach(function () {
   startHandler = sinon.spy();
   stopHandler = sinon.spy();
   completeHandler = sinon.spy();
+  lagHandler = sinon.spy();
 });
 afterEach(function () {
   this.clock.restore();
@@ -207,5 +209,66 @@ describe('Time Limit', function () {
 });
 
 describe ('Lag Event', function () {
-  it('should have a default lag value of 50')
+  it('should have a default lag value of 50', function () {
+    expect(timer.lag).to.be.equal(50);
+  });
+
+  it('should accept any number as an argument', function () {
+    var timer = new Timer(10, 60);
+    expect(timer.lag).to.be.equal(60);
+
+    var timer2 = new Timer(10, 100);
+    expect(timer2.lag).to.be.equal(100);
+  });
+
+  it('should throw an error if a non-number is passed through', function () {
+    expect(function () {
+      var timer = new Timer(10, 'string');
+    }).to.throw(Error);
+    expect(function () {
+      var timer = new Timer(10, null);
+    }).to.throw(Error);
+    expect(function () {
+      var timer = new Timer(10);
+    }).to.not.throw(Error);
+  });
+
+  describe('lag late', function () {
+    beforeEach(function () {
+      this.clock = sinon.useFakeTimers();
+      tickHandler = sinon.spy();
+      lagHandler = sinon.spy();
+      timer = new Timer();
+      var originalEmit = timer.emit;
+      var i = 0;
+      tickEmitStub = sinon.stub(timer, 'emit', function (event) {
+        setTimeout(function () {
+          originalEmit.call(this, event);
+          // console.log(i);
+        }.bind(this), 60);
+      });
+      timer.on('tick', tickHandler);
+    });
+
+    afterEach(function () {
+      tickEmitStub.restore();
+      this.clock.restore();
+    });
+      it('should emit a lag event if deviation is greater than lag argument', function () {
+        timer.on('lag', lagHandler);
+        timer.start();
+        this.clock.tick(1000);
+        expect(lagHandler.callCount).to.equal(0);
+        this.clock.tick(120);
+        expect(lagHandler.callCount).to.equal(1);
+        this.clock.tick(3000);
+        expect(lagHandler.callCount).to.equal(1);
+        this.clock.tick(1000);
+        expect(lagHandler.callCount).to.equal(1);
+        // this.clock.tick(1000);
+        // expect(tickHandler.callCount).to.equal(2);
+        // this.clock.tick(30);
+        // expect(tickHandler.callCount).to.equal(3);
+    });
+  });
 });
