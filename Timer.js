@@ -3,7 +3,7 @@ var util = require('util');
 
 module.exports = Timer;
 
-function Timer (max, lag) {
+function Timer (max, lag, msInterval) {
   if ((max !== undefined && typeof max !== 'number') || lag !== undefined && typeof lag !== 'number') {
     throw new TypeError();
   }
@@ -14,56 +14,61 @@ function Timer (max, lag) {
   this.mSecRemainder = 0;
   this.max = max || 10;
   this.lag = lag || 50;
+  this.msInterval = msInterval || 1000;
 }
 
 util.inherits(Timer, EventEmitter);
 
 Timer.prototype.start = function () {
   this.startTime = Date.now();
-  this.lastTick = Date.now();
-  this.lagTime;
+  this.lagTime = 0;
   var self = this;
-  if (this.totalTime === 0) {
-    this.interval = setInterval(function () {
-      self.emit('tick', {interval : self.i++});
-      if (self.i >= self.max) {
-        self.stop();
-        self.emit('complete', {totalTime: self.totalTime});
-      }
-    }, 1000);
-  } else {
-    this.mSecRemainder = 1000 - (this.totalTime % 1000);
-    this.interval = setInterval(function () {
-      self.emit('tick', {interval : self.i++});
-      clearInterval(self.interval);
-      if (self.i >= self.max) {
-        self.stop();
-        self.emit('complete', {totalTime: self.totalTime});
-      }
-      self.interval = setInterval(function () {
-        self.emit('tick', {interval: self.i++});
+  if ((self.lagTime > Math.abs(self.lag)) && self.lagTime !== 0) {
+    this.msInterval += this.lagTime;
+  }
+    this.lastTick = Date.now();
+    if (this.totalTime === 0) {
+      this.interval = setInterval(function () {
+        self.emit('tick', {interval : self.i++});
         if (self.i >= self.max) {
           self.stop();
           self.emit('complete', {totalTime: self.totalTime});
         }
-      }, 1000);
-    }, self.mSecRemainder);
-  }
-  this.emit('start', {startTime: this.startTime});
-  this.on('tick', function () {
-    var now = Date.now();
-    self.lagTime = (now - this.lastTick) % 1000;
-    if ((self.lagTime > self.lag || self.lagTime < self.lag) && self.lagTime !== 0) {
-      this.emit('lag', {lag: self.lagTime});
+      }, self.msInterval);
+    } else {
+      this.mSecRemainder = 1000 - (this.totalTime % 1000);
+      this.interval = setInterval(function () {
+        self.emit('tick', {interval : self.i++});
+        clearInterval(self.interval);
+        if (self.i >= self.max) {
+          self.stop();
+          self.emit('complete', {totalTime: self.totalTime});
+        }
+        self.interval = setInterval(function () {
+          self.emit('tick', {interval: self.i++});
+          if (self.i >= self.max) {
+            self.stop();
+            self.emit('complete', {totalTime: self.totalTime});
+          }
+        }, self.msInterval);
+      }, self.mSecRemainder);
     }
-    console.log(now - this.lastTick);
-    this.lastTick = now;
-  });
+    this.emit('start', {startTime: this.startTime});
+    this.on('tick', function () {
+      var now = Date.now();
+      self.lagTime = (now - this.lastTick) - 1000;
+      console.log('Time from last tick ' + (now - this.lastTick));
+      if ((self.lagTime > Math.abs(self.lag)) && self.lagTime !== 0) {
+        this.emit('lag', {lag: self.lagTime});
+      }
+      console.log('Lag adjusted ' + (1000 - (self.lagTime)));
+      this.lastTick = now;
+    });
 };
 
 Timer.prototype.stop = function () {
   this.stopTime = Date.now();
-  this.totalTime += this.stopTime - this.startTime;
+  this.totalTime += (this.stopTime - this.startTime);
   this.emit('stop', {stopTime: this.stopTime});
   clearInterval(this.interval);
 };
@@ -96,7 +101,7 @@ timer.addListener('stop', stopHandler);
 timer.addListener('complete', completeHandler);
 timer.addListener('lag', lagHandler);
 
-// timer.start();
+timer.start();
 // setTimeout(function() {
 //   timer.stop();
 // }, 9100);
